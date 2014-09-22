@@ -1,3 +1,4 @@
+#Max Roth
 #Naive Bayes Classify function
 #Input the independant and dependant columns separtely. The Dependant column is the one will want to predict
 #The output Shows Proabability of the variable = value given the column.
