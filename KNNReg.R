@@ -1,5 +1,10 @@
 library(plyr)
 library(dplyr)
+###
+#This program contains a function KNN.Standard. This function takes a dataframe and the column index of the response variable. It will then
+#split the data and perform a KNN regression. It will test all KNN fittings for k=1 through k= number of observations. The output is the
+#optimal k based on lowest SSE as discussed in chapter 7.6 of "A practical Guide to Data Mining", Myatt, Glenn J. Wiley Publishing 2007. 
+#The numerical data is noramlized and the catacorical data is messured based on the Stanfill-Waltz VDM. 
 
 ###A few notes
 #These are a few exceptions I found that would be hard to correct for
