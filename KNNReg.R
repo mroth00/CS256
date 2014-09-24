@@ -1,5 +1,5 @@
-library(plyr)
-library(dplyr)
+### Max Roth and Leon Wu
+###KNN Regression HW
 ###
 #This program contains a function KNN.Standard. This function takes a dataframe and the column index of the response variable. It will then
 #split the data and perform a KNN regression. It will test all KNN fittings for k=1 through k= number of observations. The output is the
@@ -14,7 +14,8 @@ library(dplyr)
 # an error will occure if only part of the factors in the testing data appear in the training data. Larger data sets will not have to
 # worry about this exception
 #
-
+library(plyr)
+library(dplyr)
 
 #Input the data frame and the column number of the reponse variable
 #This function standardizes the continuous data and makes factors numeric
@@ -186,14 +187,7 @@ KNN.Standard<-function(data,resp){
   #SSE for each value of k
   SEE.mat=ddply(tochange2,.(X2),sum)
   best.k=SEE.mat$X2[which.min(SEE.mat$V1)]
-  #NOw Predict new observation
-  #Normalize new data
-  #new.standardized=Normalize(newdata)
-#   for(jj in 1:dim(new.standardized)[1]){
-#     
-#   }
-#   
-# 
+
  }
 
 #Example
