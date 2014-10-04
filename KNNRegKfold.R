@@ -133,19 +133,21 @@ KNN.Standard<-function(data,resp){
   #but we can make a distance vector given the vector you want to find the distance with
   
   ##Let's optimize k, split the data 
-  #Assign 75% of the data to be training data
+  #Assign 80% of the data to be training data
   #Drop an observation to make a compatible training set
   split=cbind(standardized,fact.frame,x)
-  if(dim(split)[1]%%4==1){
+  if(dim(split)[1]%%5==1){
     split=split[-dim(split)[1],]
-  } else if(dim(split)[1]%%4==2){
+  } else if(dim(split)[1]%%5==2){
     split=split[-((dim(split)[1]-1):(dim(split)[1])),]                            
-  } else if (dim(split)[1]%%4==3){
+  } else if (dim(split)[1]%%5==3){
     split=split[-((dim(split)[1]-2):(dim(split)[1])),]
+  } else if (dim(split)[1]%%5==4){
+    split=split[-((dim(split)[1]-3):(dim(split)[1])),]
   }
   store.responses=split[,dim(split)[2]]
   split[,dim(split)[2]]=NULL
-  split.row=.75*dim(split)[1]
+  split.row=.8*dim(split)[1]
   split.training=split[1:split.row,]
   split.test=split[(split.row+1):dim(split)[1],]
   split.train.num=split.training[,1:dim(standardized)[2]]
@@ -187,7 +189,7 @@ KNN.Standard<-function(data,resp){
   #SSE for each value of k
   SEE.mat=ddply(tochange2,.(X2),sum)
   best.k=SEE.mat$X2[which.min(SEE.mat$V1)]
-SEE.mat
+differ
  }
 
 #Example
@@ -204,6 +206,7 @@ test=data.frame(col1=sample(1:20,200,replace=T),
 head(test)
 #Test the function
 test2<-KNN.Standard(test,3)
-test2
+head(test2)
+dim(test2)
 plot(test2$X2,test2$V1,type='l', xlab='Value of k', ylab='Error',main='K versus Training Error')
 text(10,9000, labels=print('k=9'),cex=.75, pos=4,offset=.3,col=2)
