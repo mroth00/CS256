@@ -187,7 +187,7 @@ KNN.Standard<-function(data,resp){
   #SSE for each value of k
   SEE.mat=ddply(tochange2,.(X2),sum)
   best.k=SEE.mat$X2[which.min(SEE.mat$V1)]
-
+SEE.mat
  }
 
 #Example
@@ -205,4 +205,5 @@ head(test)
 #Test the function
 test2<-KNN.Standard(test,3)
 test2
-
+plot(test2$X2,test2$V1,type='l', xlab='Value of k', ylab='Error',main='K versus Training Error')
+text(10,9000, labels=print('k=9'),cex=.75, pos=4,offset=.3,col=2)
