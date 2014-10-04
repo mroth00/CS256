@@ -132,10 +132,13 @@ KNN.Standard<-function(data,resp){
   #For the factors We can't do the same thing with a normalzied vector
   #but we can make a distance vector given the vector you want to find the distance with
   
+  #Function to house 'folding' the data and then computing the SEE matrix for each fold
+  kfold.SEE<-function(standardized,fact.frame,x){
   ##Let's optimize k, split the data 
   #Assign 80% of the data to be training data
   #Drop an observation to make a compatible training set
   split=cbind(standardized,fact.frame,x)
+  split=split[sample(1:dim(split)[1]),]
   if(dim(split)[1]%%5==1){
     split=split[-dim(split)[1],]
   } else if(dim(split)[1]%%5==2){
@@ -188,7 +191,13 @@ KNN.Standard<-function(data,resp){
   tochange2=data.frame(matrix(unlist(tochange),ncol=2,byrow=F))
   #SSE for each value of k
   SEE.mat=ddply(tochange2,.(X2),sum)
-  best.k=SEE.mat$X2[which.min(SEE.mat$V1)]
+  #Store 
+  #best.k=SEE.mat$X2[which.min(SEE.mat$V1)]
+  return(SEE.mat)
+  }
+  Stan.Err=kfold.SEE(standardized,fact.frame,x)
+  Stan.Err
+  
  }
 
 #Example
@@ -208,3 +217,4 @@ test2<-KNN.Standard(test,3)
 test2
 plot(test2$X2,test2$V1,type='l', xlab='Value of k', ylab='Error',main='K versus Training Error')
 text(10,8200, labels=print('k=15'),cex=.75, pos=4,offset=.3,col=2)
+head(test2)
