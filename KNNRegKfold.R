@@ -206,8 +206,7 @@ KNN.Standard<-function(data,resp){
   out.matrix=matrix(unlist(temp.list),nrow=dim(temp.list)[1],ncol=dim(temp.list)[2],byrow=F)
   SEE.mat=cbind(out.matrix[,1],(apply(out.matrix[,-1],1,sum))/5)
   #Which k row has the smallest SSE?
-  #apply(SEE.mat,2,which.min)[2]
-  SEE.mat
+  apply(SEE.mat,2,which.min)[2]
  }
 
 #Example
@@ -225,13 +224,5 @@ head(test)
 #Test the function
 test2<-KNN.Standard(test,3)
 test2
-plot(test2[,1],test2[,2],type='l', xlab='Value of k', ylab='CV Error',main='Estimate of Test Error Through CV')
-text(10,11000, labels=print('k=13'),cex=.75, pos=4,offset=.3,col=2)
-head(test2)
 
 
-
-#When  test2 is a matrix of each fold error
-matplot(test2[,1],test2[,-1],type='l', xlab='k values', ylab='SEE of Fold',main='Individual SSE for each fold',col=c(1,2,3,4,5))
-legend("bottomright", inset=.05,
-       c("k=20","k=4",'k=10','k=12','k=5'), lty=c(1,1,1,1,1), horiz=F,title="Best K", col=c(1,2,3,4,5))
