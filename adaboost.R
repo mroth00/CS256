@@ -12,6 +12,35 @@ dat=within(dat, {
 
 }
 
+#We must weight the data before we work with it
+
+weighted.variable=function(d,variable){
+  return(d*variable)
+}
+#function to update d
+update.d=function(alpha,d,stump,variable,response){
+  if(stump[1,4]==1){
+    class=-1
+  } else{
+    class=1
+  }
+  predicted.resp=sapply(variable[,stump[1,2]], function(x) if(x<stump[1,3]){variable[,stump[1,2]]=class} else{variable[,stump[1,2]]=1})
+  truth=(predicted.resp==response)
+  for(i in 1:length(d)){
+    if(truth[i]==T){
+      d[i]=(d[i]*exp(1)^(-1*alpha))
+    } else{
+      d[i]=(d[i]*exp(1)^(alpha))
+    }
+    
+  }
+  #New d must be a distribution! Sum to 1
+  sum.d=sum(d)
+  return(d/sum(d))
+}
+
+
+
 # Fit the decission stump classifier. We will iterate over each feature variable
 
 stump=function(response, variable){
@@ -59,7 +88,7 @@ english=function(stump){
   } else{
     class=1
   }
-  cat("If X", stump[1,2], " is greater than", stump[1,3], " then f(x)=", class, "\nThere is an error rate of e=", stump[1,1])
+  cat("If X", stump[1,2], " is less than", stump[1,3], " then f(x)=", class, "\nThere is an error rate of e=", stump[1,1])
   
 }
 
@@ -69,7 +98,28 @@ alpha=function(error){
 }
 
 
+
+
+adaboost=function(response, variable){
+  #starting d
+  d=rep((1/dim(variable)[1]),length=dim(variable)[1])
+  variable1=weighted.variable(d,variable)
+  for(i in 1:20){
+    english(stump(response,variable1))
+    d=update.d(alpha(stump(response,variable1)[1,1]),d,stump(response,variable1),variable1,response)
+    variable1=weighted.variable(d,variable)
+  }
+  
+  
+}
+
+
+
+
+
+
 #Scratch
+adaboost(dat[,1],dat[,2:3])
 alpha(s[1,1])
 s=stump(dat[,1],dat[,2:3])
 english(stump(dat[,1],dat[,2:3]))
@@ -94,4 +144,13 @@ classy=gsub(FALSE,class,classy)
 classy=as.numeric(gsub(TRUE,-1*class,classy))
 c(1,-1,1,-1,1)==as.numeric(dat[,1])
 as.numeric(table(c(1,-1,1,-1,1)==as.numeric(dat[,1]))[1])/length(dat[,1])
-"There is an error rate of e=", stump[1,1]
+
+
+
+
+dim(dat[,2:3])[1]
+(1/dim(dat[,2:3])[1])*dat[,2:3]
+
+rep((1/dim(dat[,2:3])[1]),length=dim(dat[,2:3])[1])*dat[,2:3]
+
+sapply(dat[,2], function(x) if(x>1.33){dat[,2]=-1} else{dat[,2]=1})
