@@ -9,9 +9,7 @@ dat=within(dat, {
   color = gsub("green",-1,color)
 })
 
-#Error funtion
-error=function(incorect,total){
-  return(incorect/total)
+
 }
 
 # Fit the decission stump classifier. We will iterate over each feature variable
@@ -54,8 +52,27 @@ stump=function(response, variable){
   }
   return(best.split)  
 }
+#Say what stump matrix means
+english=function(stump){
+  if(stump[1,4]==1){
+    class=-1
+  } else{
+    class=1
+  }
+  cat("If X", stump[1,2], " is greater than", stump[1,3], " then f(x)=", class, "\nThere is an error rate of e=", stump[1,1])
+  
+}
+
+#Calculate alpha
+alpha=function(error){
+  return(.5*log((1-error)/(error),base=exp(1)))
+}
+
 
 #Scratch
+alpha(s[1,1])
+s=stump(dat[,1],dat[,2:3])
+english(stump(dat[,1],dat[,2:3]))
 range(dat[,1])[2]-range(dat[,1])[1]
 stump(dat[,1],dat[,2:3])
 
@@ -77,3 +94,4 @@ classy=gsub(FALSE,class,classy)
 classy=as.numeric(gsub(TRUE,-1*class,classy))
 c(1,-1,1,-1,1)==as.numeric(dat[,1])
 as.numeric(table(c(1,-1,1,-1,1)==as.numeric(dat[,1]))[1])/length(dat[,1])
+"There is an error rate of e=", stump[1,1]
