@@ -17,14 +17,17 @@ error=function(incorect,total){
 # Fit the decission stump classifier. We will iterate over each feature variable
 
 stump=function(response, variable){
-  #make a matrix of the minimum and maximums of the predictors
+  ##make a matrix of the minimum and maximums of the predictors
   #we will use these as bounds to iterate over
   #minmax is a 2x(nuber of predictor) size matrix
   #the top row is mins and the bottom is maxs
   minmax=matrix(0,nrow=2,ncol=length(names(variable)))
   minmax[1,]=as.vector(unlist(apply(variable, 2,min)))
   minmax[2,]=as.vector(unlist(apply(variable, 2,max)))
-  #for every feature in the data set
+  ##
+  # Initialize a matrix of the best repsonse (error rate, feat)
+  best.split=matrix(1,nrow=1,ncol=4)
+  ##for every feature in the data set
   for(i in 1:length(names(variable))){
     #inicialize the breaks of the classifier
     #do 15 tests, this can be chaged
@@ -35,14 +38,21 @@ stump=function(response, variable){
       for(k in 1:2){
         if(k==1){
           class=-1} else{class=1}
-        as.vector(unlist(apply(variable, 2,min)))
+        classif=as.vector(unlist(sapply(variable[i], function(x) breaks[j]>x)))
+        #Change to 1 or -1
+        classif=gsub(TRUE,class,classif)
+        classif=as.numeric(gsub(FALSE,-1*class,classif))
+        #Find error
+        proportion.mistakes=as.numeric(table(response==as.numeric(classif))[1])/length(response)
+        if(proportion.mistakes<best.split[1,1]){
+          best.split=matrix(c(proportion.mistakes,i,breaks[j],k),nrow=1,ncol=4)
+        }         
       }
-      variable[,1]
     }
     
     
   }
-    
+  return(best.split)  
 }
 
 #Scratch
@@ -51,7 +61,19 @@ stump(dat[,1],dat[,2:3])
 
 1:length(names(dat[,-1]))
 minmax=matrix(0,nrow=2,ncol=length(names(dat[,-1])))
+
+
 minmax[1,]=as.vector(unlist(apply(dat[,-1], 2,min)))
 minmax[2,]=as.vector(unlist(apply(dat[,-1], 2,max)))
 typeof(minmax)
 dim(minmax)
+
+breaks=seq(from=minmax[1,1]-1,to=minmax[2,1]+1,by=(minmax[2,1]-minmax[1,1])/15)
+classy=as.vector(unlist(sapply(dat[,2], function(x) breaks[1]>x)))
+class=1
+classy[3]=T
+replace(classy, classy==FALSE,class)
+classy=gsub(FALSE,class,classy)
+classy=as.numeric(gsub(TRUE,-1*class,classy))
+c(1,-1,1,-1,1)==as.numeric(dat[,1])
+as.numeric(table(c(1,-1,1,-1,1)==as.numeric(dat[,1]))[1])/length(dat[,1])
