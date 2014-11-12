@@ -44,7 +44,7 @@ stump=function(response, variable,d){
         compare.mat=gsub(2,0,compare.mat)
         compare.mat=as.numeric(compare.mat)
         #print(compare.mat)
-        error=sum(d*compare.mat)
+        error=sum(d*compare.mat)/sum(d)
         #print(error)
         if(error<best.split[1,1]){
           best.split=matrix(c(error,i,breaks[j],k),nrow=1,ncol=4)
@@ -67,7 +67,7 @@ get.error=function(stump){
 }
 
 
-get.misclassifieds=function(stump){
+last.stump=function(stump){
   return(stump[5:length(stump)])
 }
 alpha=function(error){
@@ -78,33 +78,40 @@ alpha=function(error){
 #Last d is the last weights used
 #last errors is the 0100101 vector
 #error is the number from 
-update.d=function(last.d,last.misclass,error,alpha){
+update.d=function(last.d,last.stump,error,alpha){
   new.d=rep(0,length=length(last.d))
   for(i in 1:length(last.d)){
-    if(last.misclass[i]==0){
-      new.d[i]=(last.d[i]*exp(1)^(-1*alpha))/sum(last.d)
+    if(last.stump[i]==0){
+      new.d[i]=(last.d[i]*exp(1)^(-1*alpha))
     } else{
-      new.d[i]=(last.d[i]*exp(1)^(alpha))/sum(last.d)
+      new.d[i]=(last.d[i]*exp(1)^(alpha))
     }
-    
   }
-  return(new.d)
+  return(new.d/sum(new.d))
 }
 
 adaboost=function(response, variable){
   #initial d
   d=rep((1/dim(variable)[1]),length=dim(variable)[1])
-  stump=stump(response, variable,d)
-  #error from stump
-  error=get.error(stump)
-  #pass error to alpha
-  alpha=alpha(error)
-  last.misclass=get.misclassifieds(stump)
-  d=update.d(d,last.misclass,error,alpha)
-  return(d)
-    
+  for(i in 1:10){
+    stump=stump(response, variable,d)
+    #error from stump
+    error=get.error(stump)
+    #print(error)
+    #pass error to alpha
+    alpha=alpha(error)
+    print(alpha)
+    last.stump=last.stump(stump)
+    print(d)
+    d=update.d(d,last.stump,error,alpha)
+  }
+  
+
 }
+
+adaboost(dat[,1],dat[,2:3])
 
 get.misclassifieds(stump(dat[,1],dat[,2:3],d))
 alpha(get.misclassifieds(stump(dat[,1],dat[,2:3],d)))
-adaboost(dat[,1],dat[,2:3])
+
+
