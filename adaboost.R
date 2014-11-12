@@ -10,21 +10,25 @@ dat=within(dat, {
 })
 
 
-}
+
 
 #We must weight the data before we work with it
 
-weighted.variable=function(d,variable){
-  return(d*variable)
-}
-#function to update d
-update.d=function(alpha,d,stump,variable,response){
+
+##Return Predicted response
+#
+pred.resp=function(alpha,d,stump,variable,response){
   if(stump[1,4]==1){
     class=-1
   } else{
     class=1
   }
   predicted.resp=sapply(variable[,stump[1,2]], function(x) if(x<stump[1,3]){variable[,stump[1,2]]=class} else{variable[,stump[1,2]]=1})
+  return(predicted.resp)
+}
+#function to update d
+update.d=function(alpha,d,stump,variable,response){
+  predicted.resp=pred.resp(alpha,d,stump,variable,response)
   truth=(predicted.resp==response)
   for(i in 1:length(d)){
     if(truth[i]==T){
@@ -67,9 +71,13 @@ stump=function(response, variable){
           class=-1} else{class=1}
         classif=as.vector(unlist(sapply(variable[i], function(x) breaks[j]>x)))
         #Change to 1 or -1
+        #print(classif)
         classif=gsub(TRUE,class,classif)
         classif=as.numeric(gsub(FALSE,-1*class,classif))
+        #print(classif)
         #Find error
+        print(as.numeric(response))
+        compare.mat=matrix()
         proportion.mistakes=as.numeric(table(response==as.numeric(classif))[1])/length(response)
         if(proportion.mistakes<best.split[1,1]){
           best.split=matrix(c(proportion.mistakes,i,breaks[j],k),nrow=1,ncol=4)
@@ -104,13 +112,18 @@ adaboost=function(response, variable){
   #starting d
   d=rep((1/dim(variable)[1]),length=dim(variable)[1])
   variable1=weighted.variable(d,variable)
+  #Need to store alpha for each iteration in a vector
+  store.alpha=vector()
+  #store responses to fittings
+  store.resp=matrix(0,nrow=dim(variable)[1],ncol=20)
   for(i in 1:20){
     english(stump(response,variable1))
     d=update.d(alpha(stump(response,variable1)[1,1]),d,stump(response,variable1),variable1,response)
+    print(alpha(stump(response,variable1)[1,1]))
+    store.resp[,i]=pred.resp(alpha(stump(response,variable1)[1,1]),d,stump(response,variable1),variable1,response)
     variable1=weighted.variable(d,variable)
   }
-  
-  
+
 }
 
 
