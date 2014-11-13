@@ -49,7 +49,7 @@ stump=function(response, variable,d){
         if(error<best.split[1,1]){
           best.split=matrix(c(error,i,breaks[j],k),nrow=1,ncol=4)
           misclasified=compare.mat
-          ret.list=c(best.split,misclasified)
+          ret.list=c(best.split,misclasified,classif)
         }         
       }
     }
@@ -59,17 +59,20 @@ stump=function(response, variable,d){
   return(ret.list)  
 }
 
-d=rep((1/dim(dat[,2:3])[1]),length=dim(dat[,2:3])[1])
-length(stump(dat[,1],dat[,2:3],d))
-       
+#Function returns error from stump to use in alpha       
 get.error=function(stump){
   return(stump[1])
 }
 
-
-last.stump=function(stump){
-  return(stump[5:length(stump)])
+#returns wrong/right binary 010101
+last.stump=function(stump,response){
+  return(stump[5:(4+length(response))])
 }
+#returns the actual last guess
+last.guess=function(stump,response){
+  return(stump[(5+length(response)):(4+2*length(response))])
+}
+
 alpha=function(error){
   return(.5*log((1-error)/(error),base=exp(1)))
 }
@@ -90,8 +93,15 @@ update.d=function(last.d,last.stump,error,alpha){
   return(new.d/sum(new.d))
 }
 
+model.error=function(agg.Class.Est,response){
+  sign.agg=sign(agg.Class.Est)
+  return(sum(response!=sign.agg))
+  
+}
+
 adaboost=function(response, variable){
   #initial d
+  agg.Class.Est=rep(0,length(response))
   d=rep((1/dim(variable)[1]),length=dim(variable)[1])
   for(i in 1:10){
     stump=stump(response, variable,d)
@@ -101,8 +111,13 @@ adaboost=function(response, variable){
     #pass error to alpha
     alpha=alpha(error)
     print(alpha)
-    last.stump=last.stump(stump)
-    print(d)
+    last.stump=last.stump(stump,response)
+    last.guess=last.guess(stump,response)
+    print(last.guess)
+    agg.Class.Est=agg.Class.Est+alpha*last.guess
+    model.error=model.error(agg.Class.Est,response)
+    print(model.error)
+    #print(sum(agg.Class.Est)/length(agg.Class.Est))
     d=update.d(d,last.stump,error,alpha)
   }
   
@@ -114,4 +129,9 @@ adaboost(dat[,1],dat[,2:3])
 get.misclassifieds(stump(dat[,1],dat[,2:3],d))
 alpha(get.misclassifieds(stump(dat[,1],dat[,2:3],d)))
 
+d=rep((1/dim(dat[,2:3])[1]),length=dim(dat[,2:3])[1])
+length(stump(dat[,1],dat[,2:3],d))
+
+a=10
+toot=(c(1,2,3)!=c(1,2,4))
 
