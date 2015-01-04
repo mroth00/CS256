@@ -72,9 +72,20 @@ last.stump=function(stump,response){
 last.guess=function(stump,response){
   return(stump[(5+length(response)):(4+2*length(response))])
 }
-
+#Calculate Alpha
 alpha=function(error){
   return(.5*log((1-error)/(error),base=exp(1)))
+}
+
+english=function(stump,alpha){
+  if(stump[4]==1){
+    class=-1
+  } else{
+    class=1
+  }
+  cat("If X", stump[2], " is less than", stump[3], " then f(x)=", class,
+      "\nThere is an error rate of e=", stump[1],
+      "\nThere is an alpha of", alpha)  
 }
 
 
@@ -92,10 +103,10 @@ update.d=function(last.d,last.stump,error,alpha){
   }
   return(new.d/sum(new.d))
 }
-
+#This will tell us when to 
 model.error=function(agg.Class.Est,response){
   sign.agg=sign(agg.Class.Est)
-  return(sum(response!=sign.agg))
+  return(sum(response!=sign.agg)/length(response))
   
 }
 
@@ -113,11 +124,15 @@ adaboost=function(response, variable){
     print(alpha)
     last.stump=last.stump(stump,response)
     last.guess=last.guess(stump,response)
-    print(last.guess)
+    #print(last.guess)
     agg.Class.Est=agg.Class.Est+alpha*last.guess
     model.error=model.error(agg.Class.Est,response)
-    print(model.error)
+    eng=english(stump,alpha)
+    print(eng)
+    print(d)
     #print(sum(agg.Class.Est)/length(agg.Class.Est))
+    print(paste("Model Error", model.error))
+    if(model.error==0){break}
     d=update.d(d,last.stump,error,alpha)
   }
   
@@ -126,12 +141,109 @@ adaboost=function(response, variable){
 
 adaboost(dat[,1],dat[,2:3])
 
-get.misclassifieds(stump(dat[,1],dat[,2:3],d))
-alpha(get.misclassifieds(stump(dat[,1],dat[,2:3],d)))
 
-d=rep((1/dim(dat[,2:3])[1]),length=dim(dat[,2:3])[1])
-length(stump(dat[,1],dat[,2:3],d))
 
-a=10
-toot=(c(1,2,3)!=c(1,2,4))
+#####DATA#####
+easydat <- read.csv("C:/Users/mike/Dropbox/School/SJSU/Fall 2014/CS Stat/Project/easydat.csv", header=T)
+dat=easydat
+
+ggplot(dat, aes(x1,x2,col=color))+scale_colour_manual(values=c("green", "red"))+geom_point(size=4)+ggtitle('Plot')
+
+# ylab("x2 ")+xlab("x1")
+#Change response to binary -1 1
+dat=within(dat, {
+  color = gsub("red",1,color)
+  color = gsub("green",-1,color)
+})
+
+
+mydata <- read.csv("http://www.ats.ucla.edu/stat/data/binary.csv")
+mydata=mydata[,-4]
+head(mydata)
+
+#Change response to binary -1 1
+mydata=within(mydata, {
+  admit = gsub(0,-1,admit)  
+})
+
+adaboost(mydata[,1],mydata[,2:3])
+
+
+ggplot(mydata, aes(gre,gpa,col=admit))+geom_point(size=2) +ggtitle('Plot')+
+  geom_hline(aes(yintercept=3), colour="#990000", linetype="dashed")
+#ylab("x2 ")+xlab("x1")+ggtitle('Plot')
+
+
+##########Plotting example
+
+adaboost(dat[,1],dat[,2:3])
+
+#Step 1
+ggplot(dat, aes(x1,x2,col=color))+geom_point(size=4)+ggtitle('Plot')+scale_colour_manual(values=c("darkgreen", "red"))
+#step 2
+easydat <- read.csv("C:/Users/mike/Dropbox/School/SJSU/Fall 2014/CS Stat/Project/easy2.csv", header=T)
+dat=easydat
+dat=within(dat, {
+  color = gsub("red",1,color)
+  color = gsub("green",-1,color)
+})
+
+ggplot(dat, aes(x1,x2,col=color,shape=wrong))+geom_point(size=4)+ggtitle('Plot')+scale_colour_manual(values=c("darkgreen", "red"))+
+  geom_vline(aes(xintercept=1.3333), colour="#BB0000", linetype="dashed")+
+  scale_shape_manual(values=c(16,8))
+#step 3
+easydat <- read.csv("C:/Users/mike/Dropbox/School/SJSU/Fall 2014/CS Stat/Project/easy3.csv", header=T)
+dat=easydat
+dat=within(dat, {
+  color = gsub("red",1,color)
+  color = gsub("green",-1,color)
+})
+
+ggplot(dat, aes(x1,x2,col=color,shape=wrong,size=weight))+geom_point()+ggtitle('Plot')+scale_colour_manual(values=c("darkgreen", "red"))+
+  geom_vline(aes(xintercept=1.3333), colour="#BB0000", linetype="dashed")+
+  scale_shape_manual(values=c(16,8))
+#step 4
+easydat <- read.csv("C:/Users/mike/Dropbox/School/SJSU/Fall 2014/CS Stat/Project/easy3.csv", header=T)
+dat=easydat
+dat=within(dat, {
+  color = gsub("red",1,color)
+  color = gsub("green",-1,color)
+})
+
+ggplot(dat, aes(x1,x2,col=color,shape=wrong,size=weight))+geom_point()+ggtitle('Plot')+scale_colour_manual(values=c("darkgreen", "red"))+
+  geom_hline(aes(yintercept=1.02666), colour="#990000", linetype="dashed")+
+  scale_shape_manual(values=c(16,8))
+#step 5
+easydat <- read.csv("C:/Users/mike/Dropbox/School/SJSU/Fall 2014/CS Stat/Project/easy4.csv", header=T)
+dat=easydat
+dat=within(dat, {
+  color = gsub("red",1,color)
+  color = gsub("green",-1,color)
+})
+
+ggplot(dat, aes(x1,x2,col=color,shape=wrong,size=weight))+geom_point()+ggtitle('Plot')+scale_colour_manual(values=c("darkgreen", "red"))+
+  geom_hline(aes(yintercept=1.02666), colour="#990000", linetype="dashed")+
+  scale_shape_manual(values=c(16,8))
+#step 6
+easydat <- read.csv("C:/Users/mike/Dropbox/School/SJSU/Fall 2014/CS Stat/Project/easy5.csv", header=T)
+dat=easydat
+dat=within(dat, {
+  color = gsub("red",1,color)
+  color = gsub("green",-1,color)
+})
+
+ggplot(dat, aes(x1,x2,col=color,shape=wrong,size=weight))+geom_point()+ggtitle('Plot')+scale_colour_manual(values=c("darkgreen", "red"))+
+  geom_vline(aes(xintercept=.99), colour="#BB0000", linetype="dashed")+
+  scale_shape_manual(values=c(16,8))
+#step 7
+easydat <- read.csv("C:/Users/mike/Dropbox/School/SJSU/Fall 2014/CS Stat/Project/easy7.csv", header=T)
+dat=easydat
+dat=within(dat, {
+  color = gsub("red",1,color)
+  color = gsub("green",-1,color)
+})
+
+ggplot(dat, aes(x1,x2,col=color,shape=wrong,size=weight))+geom_point()+ggtitle('Plot')+scale_colour_manual(values=c("darkgreen", "red"))+
+  geom_vline(aes(xintercept=.99), colour="#BB0000", linetype="dashed")+
+  scale_shape_manual(values=c(16,8))
 
